@@ -1,0 +1,12 @@
+[package]
+name = "forumfactor"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = "1"
+serde = "1"
+velvet-web = "0.1"
+askama = { version = "0.12", features = ["with-axum"] }
+askama_axum = "0.4"
+rust-embed = { version = "8.5", features = ["axum"] }
