@@ -1,3 +1,5 @@
+mod app;
+
 use velvet_web::prelude::*;
 
 #[tokio::main]
@@ -13,21 +15,9 @@ async fn main() {
     sqlx::migrate!().run(&db).await.unwrap();
 
     App::new()
-        .router(app())
+        .router(app::app())
         .inject(db)
         .statics::<S>()
         .start()
         .await;
-}
-
-fn app() -> Router {
-    Router::new().route("/", get(index))
-}
-
-#[derive(Template)]
-#[template(path = "index.html")]
-struct Index;
-
-async fn index() -> Index {
-    Index {}
 }
