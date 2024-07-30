@@ -6,9 +6,18 @@ async fn main() {
     #[folder = "static"]
     struct S;
 
-    dotenv::dotenv().ok();
+    JWT::Secret.setup().await.unwrap();
 
-    App::new().router(app()).statics::<S>().start().await;
+    dotenv::dotenv().ok();
+    let db = sqlite().await;
+    sqlx::migrate!().run(&db).await.unwrap();
+
+    App::new()
+        .router(app())
+        .inject(db)
+        .statics::<S>()
+        .start()
+        .await;
 }
 
 fn app() -> Router {
