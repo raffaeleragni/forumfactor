@@ -6,6 +6,8 @@ async fn main() {
     #[folder = "static"]
     struct S;
 
+    dotenv::dotenv().ok();
+
     App::new().router(app()).statics::<S>().start().await;
 }
 
