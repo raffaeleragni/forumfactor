@@ -15,4 +15,4 @@ sqlx = {version = "0.8", features = ["sqlite"]}
 
 [dev-dependencies]
 axum = "0.7"
-axum-test = "15.0"
+axum-test = "15.3"
