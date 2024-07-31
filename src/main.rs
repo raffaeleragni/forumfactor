@@ -15,10 +15,10 @@ async fn main() {
     sqlx::migrate!().run(&db).await.unwrap();
 
     App::new()
-        .enable_compression()
         .router(app::app())
         .inject(db)
         .statics::<S>()
+        .enable_compression()
         .start()
         .await;
 }
