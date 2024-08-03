@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <link rel="stylesheet" href="styles.css">
         <script src="htmx.js"></script>
     </head>
     <body>
-        <header>Forum X</header>
-        {% include "topics.html" %}
-        {% include "posts.html" %}
+        <div class="title">Forum X</div>
+        <div hx-get="topics" hx-trigger="load"></div>
     </body>
 </html>

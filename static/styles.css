@@ -1,0 +1,50 @@
+body {
+    border: 1px white solid;
+    padding: 0;
+    margin: 0 auto 0 auto;
+    width: 80%;
+    color: #b8b8b8;
+    background: #181818;
+}
+
+body>.title {
+    font-size: 32pt;
+    text-align: center;
+}
+
+a,
+.topic>.title {
+    text-decoration: underline;
+    color: #6666b8;
+    cursor: pointer;
+}
+
+.topics,
+.posts {
+    list-style-type: none;
+    margin: 0;
+    border: 0;
+    padding: 0;
+}
+
+.topic {
+    background: #222;
+    padding: 2px 4px;
+    margin: 0 0 2px 0;
+}
+
+.topic>.title {
+    font-size: 16pt;
+}
+
+.post>.title {
+    font-size: 26pt;
+}
+
+.details {
+    display: none;
+}
+
+.stats {
+    display: none;
+}
