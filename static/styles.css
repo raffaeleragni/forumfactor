@@ -19,8 +19,8 @@ a,
     cursor: pointer;
 }
 
-.topics,
-.posts {
+.topics>ul,
+.posts>ul {
     list-style-type: none;
     margin: 0;
     border: 0;

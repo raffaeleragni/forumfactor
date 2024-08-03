@@ -1,11 +1,17 @@
-<ul class="posts" id="posts">
-    <a hx-get="topics" hx-target="#posts">Back</a>
-    {% let author = "asdf" %}
-    {% let title = "titititit" %}
-    {% let post = "1" %}
-    {% let created_at = "1995-06-07" %}
-    <li>{% include "post.html" %}</li>
-    <li>{% include "post.html" %}</li>
-    <li>{% include "post.html" %}</li>
-    <li>{% include "post.html" %}</li>
-</ul>
+<div class="posts" id="posts">
+    <ul>
+        <a hx-get="topics" hx-target="#posts">Back</a>
+        {% let author = "asdf" %}
+        {% let title = "titititit" %}
+        {% let post = "1" %}
+        {% let created_at = "1995-06-07" %}
+        <li>{% include "post.html" %}</li>
+        <li>{% include "post.html" %}</li>
+        <li>{% include "post.html" %}</li>
+        <li>{% include "post.html" %}</li>
+    </ul>
+    <form hx-post="posts">
+        <textarea rows="10" style="width:100%"></textarea>
+        <button>Post</button>
+    </form>
+</div>
