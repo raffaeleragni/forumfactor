@@ -10,7 +10,7 @@ async fn main() {
 
     JWT::Secret.setup().await.unwrap();
 
-    dotenv::dotenv().ok();
+    dotenvy::dotenv().ok();
     let db = sqlite().await;
     sqlx::migrate!().run(&db).await.unwrap();
 

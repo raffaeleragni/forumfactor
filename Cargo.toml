@@ -10,7 +10,7 @@ velvet-web = "0.1"
 askama = { version = "0.12", features = ["with-axum"] }
 askama_axum = "0.4"
 rust-embed = { version = "8.5", features = ["axum"] }
-dotenv = "0.15.0"
+dotenvy = "0.15.0"
 sqlx = {version = "0.8", features = ["sqlite"]}
 
 [dev-dependencies]

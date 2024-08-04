@@ -705,12 +705,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "dotenv"
-version = "0.15.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "77c90badedccf4105eca100756a0b1289e191f6fcbdadd3cee1d2f614f97da8f"
-
-[[package]]
 name = "dotenvy"
 version = "0.15.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -855,7 +849,7 @@ dependencies = [
  "askama_axum",
  "axum",
  "axum-test",
- "dotenv",
+ "dotenvy",
  "rust-embed",
  "serde",
  "sqlx",
@@ -3393,9 +3387,9 @@ checksum = "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426"
 
 [[package]]
 name = "velvet-web"
-version = "0.1.6"
+version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c9476fa55dcad71d449577b17081a962702568f38634b3e8f54266ebc473c87c"
+checksum = "a2a7501af2b92de53e8ab4d4bb80192350cd566bcf596a46bbc5fe953b4306eb"
 dependencies = [
  "anyhow",
  "askama",
@@ -3404,7 +3398,7 @@ dependencies = [
  "axum-extra",
  "axum-prometheus",
  "axum-server",
- "dotenv",
+ "dotenvy",
  "jsonwebtoken",
  "mime_guess",
  "reqwest",
