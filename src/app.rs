@@ -50,6 +50,7 @@ async fn topics(Extension(db): Extension<Pool<Sqlite>>) -> Topics {
 #[derive(Template)]
 #[template(path = "posts.html")]
 struct Posts {
+    topic_id: i64,
     posts: Vec<Post>,
 }
 
@@ -79,7 +80,7 @@ async fn posts(Extension(db): Extension<Pool<Sqlite>>, Path(topic_id): Path<i64>
         post: x.post.unwrap_or("".to_string()),
     })
     .collect();
-    Posts { posts }
+    Posts { topic_id, posts }
 }
 
 #[derive(Deserialize)]
@@ -106,7 +107,7 @@ async fn new_topic(
     .unwrap()
     .last_insert_rowid();
 
-    new_reply(
+    let response = new_reply(
         Extension(db),
         Path(topic_id),
         Form(PostAReply { post: form.post }),
@@ -118,14 +119,14 @@ async fn new_topic(
         "ID",
         HeaderValue::from_str(format!("{topic_id}").as_str()).unwrap(),
     );
-    (headers, "")
+    (headers, response)
 }
 
 async fn new_reply(
     Extension(db): Extension<Pool<Sqlite>>,
     Path(topic_id): Path<i64>,
     Form(form): Form<PostAReply>,
-) {
+) -> impl IntoResponse {
     query!(
         "insert into posts (id, topic_id, post) values (null, ?, ?)",
         topic_id,
@@ -134,4 +135,6 @@ async fn new_reply(
     .execute(&db)
     .await
     .unwrap();
+
+    posts(Extension(db), Path(topic_id)).await
 }

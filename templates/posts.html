@@ -5,8 +5,8 @@
         <li>{% include "post.html" %}</li>
         {% endfor %}
     </ul>
-    <form hx-post="posts">
-        <textarea rows="10" style="width:100%"></textarea>
+    <form hx-post="posts/{{topic_id}}" hx-target="#posts">
+        <textarea name="post" rows="10" style="width:100%"></textarea>
         <button>Post</button>
     </form>
 </div>
