@@ -1,7 +1,7 @@
 <div class="posts" id="posts">
+    <a hx-get="topics" hx-target="#posts">Back</a>
     <div class="title">{{title}}</div>
     <ul>
-        <a hx-get="topics" hx-target="#posts">Back</a>
         {% for post in posts %}
         <li>{% include "post.html" %}</li>
         {% endfor %}
