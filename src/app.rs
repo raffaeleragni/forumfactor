@@ -3,8 +3,8 @@ use velvet_web::prelude::*;
 pub fn app() -> Router {
     Router::new()
         .route("/", get(index))
-        .route("/topics", get(topics))
-        .route("/posts", get(posts).post(new_post))
+        .route("/topics", get(topics).post(new_topic))
+        .route("/posts", get(posts))
 }
 
 #[derive(Template)]
@@ -17,10 +17,33 @@ async fn index() -> Index {
 
 #[derive(Template)]
 #[template(path = "topics.html")]
-struct Topics;
+struct Topics {
+    topics: Vec<Topic>,
+}
 
-async fn topics() -> Topics {
-    Topics {}
+#[derive(Debug)]
+struct Topic {
+    id: i64,
+    title: String,
+}
+
+async fn topics(Extension(db): Extension<Pool<Sqlite>>) -> Topics {
+    #[derive(Debug)]
+    struct InnerTopic {
+        id: i64,
+        title: Option<String>,
+    }
+    let topics = query_as!(InnerTopic, "select id,title from topics")
+        .fetch_all(&db)
+        .await
+        .unwrap()
+        .into_iter()
+        .map(|x| Topic {
+            id: x.id,
+            title: x.title.unwrap_or("".to_string()),
+        })
+        .collect();
+    Topics { topics }
 }
 
 #[derive(Template)]
@@ -31,4 +54,17 @@ async fn posts() -> Posts {
     Posts {}
 }
 
-async fn new_post() {}
+#[derive(Deserialize)]
+struct PostATopic {
+    title: String,
+}
+
+async fn new_topic(Extension(db): Extension<Pool<Sqlite>>, Form(form): Form<PostATopic>) {
+    query!(
+        "insert into topics (id, title) values (null, ?)",
+        form.title
+    )
+    .execute(&db)
+    .await
+    .unwrap();
+}

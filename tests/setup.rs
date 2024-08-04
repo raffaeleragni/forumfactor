@@ -4,9 +4,17 @@ use forumfactor::app::app;
 use velvet_web::prelude::*;
 
 pub async fn setup() -> TestServer {
+    let db = newdb().await;
     JWT::Secret.setup().await.unwrap();
-    let db = sqlite().await;
+
     TestServer::new(app().layer(Extension(db))).unwrap()
+}
+
+async fn newdb() -> Pool<Sqlite> {
+    std::fs::remove_file("test.db").unwrap_or(());
+    let db = sqlite().await;
+    sqlx::migrate!().run(&db).await.unwrap();
+    db
 }
 
 #[tokio::test]
@@ -17,6 +25,19 @@ async fn test_setup() {
 
 #[tokio::test]
 async fn test_post() {
+    #[derive(Serialize)]
+    struct Form<'a> {
+        title: &'a str,
+    }
+    let f = Form {
+        title: "posted title",
+    };
+
     let server = setup().await;
-    server.post("/posts").await.assert_status_ok();
+    server.post("/topics").form(&f).await.assert_status_ok();
+
+    server
+        .get("/topics")
+        .await
+        .assert_text_contains("posted title");
 }
