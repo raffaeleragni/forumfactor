@@ -25,18 +25,8 @@ async fn test_setup() {
 
 #[tokio::test]
 async fn test_post() {
-    #[derive(Serialize)]
-    struct Form<'a> {
-        title: &'a str,
-        post: &'a str,
-    }
-    let f = Form {
-        title: "posted title",
-        post: "posted post",
-    };
-
     let server = setup().await;
-    server.post("/topics").form(&f).await.assert_status_ok();
+    server.make_post("posted title", "posted post").await;
 
     server
         .get("/topics")
@@ -46,4 +36,21 @@ async fn test_post() {
         .get("/posts")
         .await
         .assert_text_contains("posted post");
+}
+
+trait MakePost {
+    async fn make_post<'a>(&self, title: &'a str, post: &'a str);
+}
+
+impl MakePost for TestServer {
+    async fn make_post<'a>(&self, title: &'a str, post: &'a str) {
+        #[derive(Serialize)]
+        struct Form<'a> {
+            title: &'a str,
+            post: &'a str,
+        }
+        let f = Form { title, post };
+
+        self.post("/topics").form(&f).await.assert_status_ok();
+    }
 }
