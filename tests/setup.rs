@@ -27,6 +27,7 @@ async fn test_setup() {
 async fn test_post() {
     let server = setup().await;
     let topic_id = server.make_post("posted title", "posted post").await;
+    server.make_reply(topic_id, "posted second").await;
 
     server
         .get("/topics")
@@ -36,6 +37,10 @@ async fn test_post() {
         .get(format!("/posts/{topic_id}").as_str())
         .await
         .assert_text_contains("posted post");
+    server
+        .get(format!("/posts/{topic_id}").as_str())
+        .await
+        .assert_text_contains("posted second");
 }
 
 trait MakePost {
@@ -74,7 +79,7 @@ impl MakeReply for TestServer {
         }
         let f = Form { post };
 
-        self.post(format!("/posts/{}", topic_id).as_str())
+        self.post(format!("/posts/{topic_id}").as_str())
             .form(&f)
             .await
             .assert_status_ok();

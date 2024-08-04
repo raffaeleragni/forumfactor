@@ -5,7 +5,7 @@ pub fn app() -> Router {
     Router::new()
         .route("/", get(index))
         .route("/topics", get(topics).post(new_topic))
-        .route("/posts/:topic_id", get(posts))
+        .route("/posts/:topic_id", get(posts).post(new_reply))
 }
 
 #[derive(Template)]
@@ -88,6 +88,11 @@ struct PostATopic {
     post: String,
 }
 
+#[derive(Deserialize)]
+struct PostAReply {
+    post: String,
+}
+
 async fn new_topic(
     Extension(db): Extension<Pool<Sqlite>>,
     Form(form): Form<PostATopic>,
@@ -101,6 +106,26 @@ async fn new_topic(
     .unwrap()
     .last_insert_rowid();
 
+    new_reply(
+        Extension(db),
+        Path(topic_id),
+        Form(PostAReply { post: form.post }),
+    )
+    .await;
+
+    let mut headers = HeaderMap::new();
+    headers.insert(
+        "ID",
+        HeaderValue::from_str(format!("{topic_id}").as_str()).unwrap(),
+    );
+    (headers, "")
+}
+
+async fn new_reply(
+    Extension(db): Extension<Pool<Sqlite>>,
+    Path(topic_id): Path<i64>,
+    Form(form): Form<PostAReply>,
+) {
     query!(
         "insert into posts (id, topic_id, post) values (null, ?, ?)",
         topic_id,
@@ -109,11 +134,4 @@ async fn new_topic(
     .execute(&db)
     .await
     .unwrap();
-
-    let mut headers = HeaderMap::new();
-    headers.insert(
-        "ID",
-        HeaderValue::from_str(format!("{topic_id}").as_str()).unwrap(),
-    );
-    (headers, "")
 }
