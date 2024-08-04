@@ -48,21 +48,55 @@ async fn topics(Extension(db): Extension<Pool<Sqlite>>) -> Topics {
 
 #[derive(Template)]
 #[template(path = "posts.html")]
-struct Posts;
+struct Posts {
+    posts: Vec<Post>,
+}
 
-async fn posts() -> Posts {
-    Posts {}
+#[derive(Debug)]
+struct Post {
+    id: i64,
+    post: String,
+}
+
+async fn posts(Extension(db): Extension<Pool<Sqlite>>) -> Posts {
+    #[derive(Debug)]
+    struct InnerPost {
+        id: i64,
+        post: Option<String>,
+    }
+    let posts = query_as!(InnerPost, "select id,post from posts")
+        .fetch_all(&db)
+        .await
+        .unwrap()
+        .into_iter()
+        .map(|x| Post {
+            id: x.id,
+            post: x.post.unwrap_or("".to_string()),
+        })
+        .collect();
+    Posts { posts }
 }
 
 #[derive(Deserialize)]
 struct PostATopic {
     title: String,
+    post: String,
 }
 
 async fn new_topic(Extension(db): Extension<Pool<Sqlite>>, Form(form): Form<PostATopic>) {
-    query!(
+    let topic_id = query!(
         "insert into topics (id, title) values (null, ?)",
         form.title
+    )
+    .execute(&db)
+    .await
+    .unwrap()
+    .last_insert_rowid();
+
+    query!(
+        "insert into posts (id, topic_id, post) values (null, ?, ?)",
+        topic_id,
+        form.post
     )
     .execute(&db)
     .await

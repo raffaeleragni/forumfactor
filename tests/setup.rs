@@ -28,9 +28,11 @@ async fn test_post() {
     #[derive(Serialize)]
     struct Form<'a> {
         title: &'a str,
+        post: &'a str,
     }
     let f = Form {
         title: "posted title",
+        post: "posted post",
     };
 
     let server = setup().await;
@@ -40,4 +42,8 @@ async fn test_post() {
         .get("/topics")
         .await
         .assert_text_contains("posted title");
+    server
+        .get("/posts")
+        .await
+        .assert_text_contains("posted post");
 }
