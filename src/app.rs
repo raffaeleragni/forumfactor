@@ -4,7 +4,7 @@ pub fn app() -> Router {
     Router::new()
         .route("/", get(index))
         .route("/topics", get(topics))
-        .route("/posts", get(posts))
+        .route("/posts", get(posts).post(new_post))
 }
 
 #[derive(Template)]
@@ -30,3 +30,5 @@ struct Posts;
 async fn posts() -> Posts {
     Posts {}
 }
+
+async fn new_post() {}
