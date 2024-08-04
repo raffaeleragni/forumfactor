@@ -26,24 +26,28 @@ async fn test_setup() {
 #[tokio::test]
 async fn test_post() {
     let server = setup().await;
-    server.make_post("posted title", "posted post").await;
+    let topic_id = server.make_post("posted title", "posted post").await;
 
     server
         .get("/topics")
         .await
         .assert_text_contains("posted title");
     server
-        .get("/posts")
+        .get(format!("/posts/{topic_id}").as_str())
         .await
         .assert_text_contains("posted post");
 }
 
 trait MakePost {
-    async fn make_post<'a>(&self, title: &'a str, post: &'a str);
+    async fn make_post<'a>(&self, title: &'a str, post: &'a str) -> i64;
+}
+
+trait MakeReply {
+    async fn make_reply<'a>(&self, topic_id: i64, post: &'a str);
 }
 
 impl MakePost for TestServer {
-    async fn make_post<'a>(&self, title: &'a str, post: &'a str) {
+    async fn make_post<'a>(&self, title: &'a str, post: &'a str) -> i64 {
         #[derive(Serialize)]
         struct Form<'a> {
             title: &'a str,
@@ -51,6 +55,28 @@ impl MakePost for TestServer {
         }
         let f = Form { title, post };
 
-        self.post("/topics").form(&f).await.assert_status_ok();
+        let response = self.post("/topics").form(&f).await;
+        response.assert_status_ok();
+        response
+            .header("ID")
+            .to_str()
+            .unwrap()
+            .parse::<i64>()
+            .unwrap()
+    }
+}
+
+impl MakeReply for TestServer {
+    async fn make_reply<'a>(&self, topic_id: i64, post: &'a str) {
+        #[derive(Serialize)]
+        struct Form<'a> {
+            post: &'a str,
+        }
+        let f = Form { post };
+
+        self.post(format!("/posts/{}", topic_id).as_str())
+            .form(&f)
+            .await
+            .assert_status_ok();
     }
 }

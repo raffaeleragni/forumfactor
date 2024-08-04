@@ -1,10 +1,11 @@
+use askama_axum::IntoResponse;
 use velvet_web::prelude::*;
 
 pub fn app() -> Router {
     Router::new()
         .route("/", get(index))
         .route("/topics", get(topics).post(new_topic))
-        .route("/posts", get(posts))
+        .route("/posts/:topic_id", get(posts))
 }
 
 #[derive(Template)]
@@ -58,22 +59,26 @@ struct Post {
     post: String,
 }
 
-async fn posts(Extension(db): Extension<Pool<Sqlite>>) -> Posts {
+async fn posts(Extension(db): Extension<Pool<Sqlite>>, Path(topic_id): Path<i64>) -> Posts {
     #[derive(Debug)]
     struct InnerPost {
         id: i64,
         post: Option<String>,
     }
-    let posts = query_as!(InnerPost, "select id,post from posts")
-        .fetch_all(&db)
-        .await
-        .unwrap()
-        .into_iter()
-        .map(|x| Post {
-            id: x.id,
-            post: x.post.unwrap_or("".to_string()),
-        })
-        .collect();
+    let posts = query_as!(
+        InnerPost,
+        "select id,post from posts where topic_id=?",
+        topic_id
+    )
+    .fetch_all(&db)
+    .await
+    .unwrap()
+    .into_iter()
+    .map(|x| Post {
+        id: x.id,
+        post: x.post.unwrap_or("".to_string()),
+    })
+    .collect();
     Posts { posts }
 }
 
@@ -83,7 +88,10 @@ struct PostATopic {
     post: String,
 }
 
-async fn new_topic(Extension(db): Extension<Pool<Sqlite>>, Form(form): Form<PostATopic>) {
+async fn new_topic(
+    Extension(db): Extension<Pool<Sqlite>>,
+    Form(form): Form<PostATopic>,
+) -> impl IntoResponse {
     let topic_id = query!(
         "insert into topics (id, title) values (null, ?)",
         form.title
@@ -101,4 +109,11 @@ async fn new_topic(Extension(db): Extension<Pool<Sqlite>>, Form(form): Form<Post
     .execute(&db)
     .await
     .unwrap();
+
+    let mut headers = HeaderMap::new();
+    headers.insert(
+        "ID",
+        HeaderValue::from_str(format!("{topic_id}").as_str()).unwrap(),
+    );
+    (headers, "")
 }
