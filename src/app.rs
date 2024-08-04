@@ -51,6 +51,7 @@ async fn topics(Extension(db): Extension<Pool<Sqlite>>) -> Topics {
 #[template(path = "posts.html")]
 struct Posts {
     topic_id: i64,
+    title: String,
     posts: Vec<Post>,
 }
 
@@ -66,6 +67,19 @@ async fn posts(Extension(db): Extension<Pool<Sqlite>>, Path(topic_id): Path<i64>
         id: i64,
         post: Option<String>,
     }
+    #[derive(Debug)]
+    struct TitleField {
+        title: Option<String>,
+    }
+    let title = query_as!(
+        TitleField,
+        "select title from topics where id = ?",
+        topic_id
+    )
+    .fetch_one(&db)
+    .await
+    .unwrap()
+    .title;
     let posts = query_as!(
         InnerPost,
         "select id,post from posts where topic_id=?",
@@ -80,7 +94,11 @@ async fn posts(Extension(db): Extension<Pool<Sqlite>>, Path(topic_id): Path<i64>
         post: x.post.unwrap_or("".to_string()),
     })
     .collect();
-    Posts { topic_id, posts }
+    Posts {
+        topic_id,
+        title: title.unwrap_or("".to_string()),
+        posts,
+    }
 }
 
 #[derive(Deserialize)]
