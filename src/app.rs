@@ -124,14 +124,14 @@ async fn ensure_group_id(db: &Pool<Sqlite>, group: &str) -> i64 {
         .fetch_one(db)
         .await
         .ok()
-        .map(|r| r.id);
+        .and_then(|r| r.id);
     match id {
+        Some(v) => v,
         None => query!("insert into groups (id, title) values (null, ?)", group)
             .execute(db)
             .await
             .unwrap()
             .last_insert_rowid(),
-        Some(id) => id,
     }
 }
 
