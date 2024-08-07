@@ -30,14 +30,7 @@ struct Topic {
 }
 
 async fn topics(Extension(db): Extension<Pool<Sqlite>>) -> Topics {
-    #[derive(Debug)]
-    struct InnerTopic {
-        id: i64,
-        title: Option<String>,
-        group: Option<String>,
-    }
-    let topics = query_as!(
-        InnerTopic,
+    let topics = query!(
         "select t.id,t.title,g.title as 'group' from topics t left join groups g on t.group_id = g.id"
     )
     .fetch_all(&db)
@@ -68,38 +61,21 @@ struct Post {
 }
 
 async fn posts(Extension(db): Extension<Pool<Sqlite>>, Path(topic_id): Path<i64>) -> Posts {
-    #[derive(Debug)]
-    struct InnerPost {
-        id: i64,
-        post: Option<String>,
-    }
-    #[derive(Debug)]
-    struct TitleField {
-        title: Option<String>,
-    }
-    let title = query_as!(
-        TitleField,
-        "select title from topics where id = ?",
-        topic_id
-    )
-    .fetch_one(&db)
-    .await
-    .unwrap()
-    .title;
-    let posts = query_as!(
-        InnerPost,
-        "select id,post from posts where topic_id=?",
-        topic_id
-    )
-    .fetch_all(&db)
-    .await
-    .unwrap()
-    .into_iter()
-    .map(|x| Post {
-        id: x.id,
-        post: x.post.unwrap_or("".to_string()),
-    })
-    .collect();
+    let title = query!("select title from topics where id = ?", topic_id)
+        .fetch_one(&db)
+        .await
+        .unwrap()
+        .title;
+    let posts = query!("select id,post from posts where topic_id=?", topic_id)
+        .fetch_all(&db)
+        .await
+        .unwrap()
+        .into_iter()
+        .map(|x| Post {
+            id: x.id,
+            post: x.post.unwrap_or("".to_string()),
+        })
+        .collect();
     Posts {
         topic_id,
         title: title.unwrap_or("".to_string()),
