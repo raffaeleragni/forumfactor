@@ -34,7 +34,7 @@ async fn topics(Extension(db): Extension<Pool<Sqlite>>) -> Topics {
     struct InnerTopic {
         id: i64,
         title: Option<String>,
-        group: Option<String>
+        group: Option<String>,
     }
     let topics = query_as!(
         InnerTopic,
@@ -109,6 +109,7 @@ async fn posts(Extension(db): Extension<Pool<Sqlite>>, Path(topic_id): Path<i64>
 
 #[derive(Deserialize)]
 struct PostATopic {
+    group: String,
     title: String,
     post: String,
 }
@@ -118,13 +119,31 @@ struct PostAReply {
     post: String,
 }
 
+async fn ensure_group_id(db: &Pool<Sqlite>, group: &str) -> i64 {
+    let id = query!("select id from groups where title = ?", group)
+        .fetch_one(db)
+        .await
+        .ok()
+        .map(|r| r.id);
+    match id {
+        None => query!("insert into groups (id, title) values (null, ?)", group)
+            .execute(db)
+            .await
+            .unwrap()
+            .last_insert_rowid(),
+        Some(id) => id,
+    }
+}
+
 async fn new_topic(
     Extension(db): Extension<Pool<Sqlite>>,
     Form(form): Form<PostATopic>,
 ) -> impl IntoResponse {
+    let group_id = ensure_group_id(&db, &form.group).await;
     let topic_id = query!(
-        "insert into topics (id, title) values (null, ?)",
-        form.title
+        "insert into topics (id, title, group_id) values (null, ?, ?)",
+        form.title,
+        group_id
     )
     .execute(&db)
     .await

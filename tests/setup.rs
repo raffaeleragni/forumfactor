@@ -26,13 +26,14 @@ async fn test_setup() {
 #[tokio::test]
 async fn test_post() {
     let server = setup().await;
-    let topic_id = server.make_post("posted title", "posted post").await;
+    let topic_id = server
+        .make_post("posted group", "posted title", "posted post")
+        .await;
     server.make_reply(topic_id, "posted second").await;
 
-    server
-        .get("/topics")
-        .await
-        .assert_text_contains("posted title");
+    let topics = server.get("/topics").await;
+    topics.assert_text_contains("posted group");
+    topics.assert_text_contains("posted title");
     server
         .get(format!("/posts/{topic_id}").as_str())
         .await
@@ -44,7 +45,7 @@ async fn test_post() {
 }
 
 trait MakePost {
-    async fn make_post<'a>(&self, title: &'a str, post: &'a str) -> i64;
+    async fn make_post<'a>(&self, group: &'a str, title: &'a str, post: &'a str) -> i64;
 }
 
 trait MakeReply {
@@ -52,13 +53,14 @@ trait MakeReply {
 }
 
 impl MakePost for TestServer {
-    async fn make_post<'a>(&self, title: &'a str, post: &'a str) -> i64 {
+    async fn make_post<'a>(&self, group: &'a str, title: &'a str, post: &'a str) -> i64 {
         #[derive(Serialize)]
         struct Form<'a> {
+            group: &'a str,
             title: &'a str,
             post: &'a str,
         }
-        let f = Form { title, post };
+        let f = Form { group, title, post };
 
         let response = self.post("/topics").form(&f).await;
         response.assert_status_ok();
