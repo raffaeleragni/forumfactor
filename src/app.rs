@@ -26,6 +26,7 @@ struct Topics {
 struct Topic {
     id: i64,
     title: String,
+    group: String,
 }
 
 async fn topics(Extension(db): Extension<Pool<Sqlite>>) -> Topics {
@@ -33,17 +34,22 @@ async fn topics(Extension(db): Extension<Pool<Sqlite>>) -> Topics {
     struct InnerTopic {
         id: i64,
         title: Option<String>,
+        group: Option<String>
     }
-    let topics = query_as!(InnerTopic, "select id,title from topics")
-        .fetch_all(&db)
-        .await
-        .unwrap()
-        .into_iter()
-        .map(|x| Topic {
-            id: x.id,
-            title: x.title.unwrap_or("".to_string()),
-        })
-        .collect();
+    let topics = query_as!(
+        InnerTopic,
+        "select t.id,t.title,g.title as 'group' from topics t left join groups g on t.group_id = g.id"
+    )
+    .fetch_all(&db)
+    .await
+    .unwrap()
+    .into_iter()
+    .map(|x| Topic {
+        id: x.id,
+        title: x.title.unwrap_or("".to_string()),
+        group: x.group.unwrap_or("".to_string()),
+    })
+    .collect();
     Topics { topics }
 }
 
