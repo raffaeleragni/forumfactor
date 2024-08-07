@@ -1,9 +1,9 @@
 {% let author = "asdf" %}
 {% let created_at = "1995-06-07" %}
 <div class="topic">
+    <div class="group">{{topic.group}}</div>
     <div class="title" hx-get="posts/{{topic.id}}" hx-target="#topics">{{topic.title}}</div>
     <div class="details">
-        <div class="group">{{topic.group}}</div>
         <div class="author">{{author}}</div>
         <div class="created-at">{{created_at}}</div>
     </div>

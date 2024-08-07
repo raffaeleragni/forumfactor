@@ -33,7 +33,20 @@ a,
     margin: 0 0 2px 0;
 }
 
+.topic>.group {
+    display: inline;
+}
+
+.topic>.group:before {
+    content: '[';
+}
+
+.topic>.group:after {
+    content: ']';
+}
+
 .topic>.title {
+    display: inline;
     font-size: 16pt;
 }
 

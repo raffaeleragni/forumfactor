@@ -31,7 +31,7 @@ struct Topic {
 
 async fn topics(Extension(db): Extension<Pool<Sqlite>>) -> Topics {
     let topics = query!(
-        "select t.id,t.title,g.title as 'group' from topics t left join groups g on t.group_id = g.id"
+        "select t.id,t.title,g.title as 'group' from topics t left join groups g on t.group_id = g.id order by g.title,t.title"
     )
     .fetch_all(&db)
     .await
