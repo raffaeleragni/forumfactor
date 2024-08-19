@@ -3387,9 +3387,9 @@ checksum = "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426"
 
 [[package]]
 name = "velvet-web"
-version = "0.1.7"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a2a7501af2b92de53e8ab4d4bb80192350cd566bcf596a46bbc5fe953b4306eb"
+checksum = "7d77f81ee2cee8918482f8f5734610a4156d77284ffeebbea19b80beb0031327"
 dependencies = [
  "anyhow",
  "askama",
