@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 tokio = "1"
 serde = "1"
-velvet-web = { version = "0.2", features = ["sqlite"] }
+velvet-web = { version = "0.3", features = ["sqlite"] }
 askama = { version = "0.12", features = ["with-axum"] }
 askama_axum = "0.4"
 rust-embed = { version = "8.5", features = ["axum"] }
@@ -15,7 +15,7 @@ sqlx = {version = "0.8", features = ["sqlite"]}
 
 [dev-dependencies]
 axum = "0.7"
-axum-test = "15.3"
+axum-test = "15.6"
 
 [profile.dev.package.askama_derive]
 opt-level = 3

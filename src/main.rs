@@ -8,8 +8,6 @@ async fn main() {
     #[folder = "static"]
     struct S;
 
-    JWT::Secret.setup().await.unwrap();
-
     dotenvy::dotenv().ok();
     let db = sqlite().await;
     sqlx::migrate!().run(&db).await.unwrap();

@@ -5,7 +5,6 @@ use velvet_web::prelude::*;
 
 pub async fn setup() -> TestServer {
     let db = newdb().await;
-    JWT::Secret.setup().await.unwrap();
 
     TestServer::new(app().layer(Extension(db))).unwrap()
 }
