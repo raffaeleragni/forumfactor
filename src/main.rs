@@ -16,7 +16,6 @@ async fn main() {
         .router(app::app())
         .inject(db)
         .statics::<S>()
-        .enable_compression()
         .start()
         .await;
 }
