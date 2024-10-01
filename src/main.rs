@@ -17,5 +17,6 @@ async fn main() {
         .inject(db)
         .statics::<S>()
         .start()
-        .await;
+        .await
+        .unwrap();
 }
