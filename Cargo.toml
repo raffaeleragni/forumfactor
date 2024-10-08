@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 tokio = "1"
 serde = "1"
-velvet-web = { version = "0.5", features = ["sqlite"] }
+velvet-web = { version = "0.6", features = ["sqlite"] }
 askama = { version = "0.12", features = ["with-axum"] }
 askama_axum = "0.4"
 rust-embed = { version = "8.5", features = ["axum"] }
