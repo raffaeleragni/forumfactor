@@ -8,6 +8,12 @@ pub fn app() -> Router {
         .route("/posts/:topic_id", get(posts).post(new_reply))
 }
 
+#[derive(Deserialize)]
+#[allow(dead_code)]
+pub struct Claims {
+    username: String,
+}
+
 #[derive(Template)]
 #[template(path = "index.html")]
 struct Index;
@@ -27,11 +33,12 @@ struct Topic {
     id: i64,
     title: String,
     group: String,
+    author: String,
 }
 
 async fn topics(Extension(db): Extension<Pool<Sqlite>>) -> Topics {
     let topics = query!(
-        "select t.id,t.title,g.title as 'group' from topics t left join groups g on t.group_id = g.id order by g.title,t.title"
+        "select t.id,t.title,g.title as 'group',t.author from topics t left join groups g on t.group_id = g.id order by g.title,t.title"
     )
     .fetch_all(&db)
     .await
@@ -41,6 +48,7 @@ async fn topics(Extension(db): Extension<Pool<Sqlite>>) -> Topics {
         id: x.id,
         title: x.title.unwrap_or("".to_string()),
         group: x.group.unwrap_or("".to_string()),
+        author: x.author.unwrap_or("".to_string()),
     })
     .collect();
     Topics { topics }
@@ -58,6 +66,7 @@ struct Posts {
 struct Post {
     id: i64,
     post: String,
+    author: String,
 }
 
 async fn posts(Extension(db): Extension<Pool<Sqlite>>, Path(topic_id): Path<i64>) -> Posts {
@@ -66,16 +75,20 @@ async fn posts(Extension(db): Extension<Pool<Sqlite>>, Path(topic_id): Path<i64>
         .await
         .unwrap()
         .title;
-    let posts = query!("select id,post from posts where topic_id=?", topic_id)
-        .fetch_all(&db)
-        .await
-        .unwrap()
-        .into_iter()
-        .map(|x| Post {
-            id: x.id,
-            post: x.post.unwrap_or("".to_string()),
-        })
-        .collect();
+    let posts = query!(
+        "select id,post,author from posts where topic_id=?",
+        topic_id
+    )
+    .fetch_all(&db)
+    .await
+    .unwrap()
+    .into_iter()
+    .map(|x| Post {
+        id: x.id,
+        post: x.post.unwrap_or("".to_string()),
+        author: x.author.unwrap_or("".to_string()),
+    })
+    .collect();
     Posts {
         topic_id,
         title: title.unwrap_or("".to_string()),
@@ -113,13 +126,15 @@ async fn ensure_group_id(db: &Pool<Sqlite>, group: &str) -> i64 {
 
 async fn new_topic(
     Extension(db): Extension<Pool<Sqlite>>,
+    CookieClaims(claims): CookieClaims<Claims>,
     Form(form): Form<PostATopic>,
 ) -> impl IntoResponse {
     let group_id = ensure_group_id(&db, &form.group).await;
     let topic_id = query!(
-        "insert into topics (id, title, group_id) values (null, ?, ?)",
+        "insert into topics (id, title, group_id, author) values (null, ?, ?, ?)",
         form.title,
-        group_id
+        group_id,
+        claims.username
     )
     .execute(&db)
     .await
@@ -128,6 +143,7 @@ async fn new_topic(
 
     let response = new_reply(
         Extension(db),
+        CookieClaims(claims),
         Path(topic_id),
         Form(PostAReply { post: form.post }),
     )
@@ -143,13 +159,15 @@ async fn new_topic(
 
 async fn new_reply(
     Extension(db): Extension<Pool<Sqlite>>,
+    CookieClaims(claims): CookieClaims<Claims>,
     Path(topic_id): Path<i64>,
     Form(form): Form<PostAReply>,
 ) -> impl IntoResponse {
     query!(
-        "insert into posts (id, topic_id, post) values (null, ?, ?)",
+        "insert into posts (id, topic_id, post, author) values (null, ?, ?, ?)",
         topic_id,
-        form.post
+        form.post,
+        claims.username
     )
     .execute(&db)
     .await

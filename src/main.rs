@@ -1,5 +1,6 @@
 mod app;
 
+use app::Claims;
 use velvet_web::prelude::*;
 
 #[tokio::main]
@@ -7,12 +8,6 @@ async fn main() {
     #[derive(RustEmbed)]
     #[folder = "static"]
     struct S;
-
-    #[derive(Deserialize)]
-    #[allow(dead_code)]
-    struct Claims {
-        username: String,
-    }
 
     dotenvy::dotenv().ok();
     let db = sqlite().await;
