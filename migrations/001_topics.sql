@@ -1,4 +1,5 @@
 create table if not exists topics (
     id integer primary key,
-    title text
+    title text,
+    author text
 )
