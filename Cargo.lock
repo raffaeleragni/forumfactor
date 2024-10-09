@@ -3253,9 +3253,9 @@ checksum = "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426"
 
 [[package]]
 name = "velvet-web"
-version = "0.6.3"
+version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bf7ffdebfcfaea61c43dab0a64a01c3b39ef86568834992e6b3e991d49c66b97"
+checksum = "114d5d30ae7c31447e03ff194c0cc9853431407e47cc71333e514304101502d9"
 dependencies = [
  "anyhow",
  "argon2",
