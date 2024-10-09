@@ -4,10 +4,15 @@
         <li>{% include "topic.html" %}</li>
         {% endfor %}
     </ul>
-    <form hx-post="topics" hx-target="#topics">
-        <label for="group">Group</label><input type="text" id="group" name="group" />
-        <label for="title">Title</label><input type="text" id="title" name="title" />
-        <textarea name="post" rows="10" style="width:100%"></textarea>
-        <button>Post</button>
-    </form>
+    <section>
+        <details>
+            <summary>Post new:</summary>
+            <form hx-post="topics" hx-target="#topics">
+                <label for="group">Group</label><input type="text" id="group" name="group" />
+                <label for="title">Title</label><input type="text" id="title" name="title" />
+                <textarea name="post" rows="10" style="width:100%"></textarea>
+                <button>Post</button>
+            </form>
+        </details>
+    </section>
 </div>
