@@ -15,9 +15,10 @@ async fn main() {
 
     App::new()
         .router(app::app().authorized_cookie_claims("/login", |_: Claims| Ok(AuthResult::OK)))
-        .login_flow(&db)
+        .login_flow_with_mail(&db)
         .await
         .inject(db)
+        .inject(mailer())
         .statics::<S>()
         .start()
         .await

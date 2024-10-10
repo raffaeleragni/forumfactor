@@ -1,0 +1,8 @@
+services:
+  mail:
+    image: docker.io/rnwood/smtp4dev:v3
+    ports: ["2525:25", "8989:80"]
+    environment:
+      - ServerOptions__TlsMode=ImplicitTls
+      - ServerOptions__Login=user
+ 
