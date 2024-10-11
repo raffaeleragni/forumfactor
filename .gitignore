@@ -1,3 +1,4 @@
 /debug/
 /target/
 /test.db
+/Cargo.lock
