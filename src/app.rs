@@ -1,11 +1,28 @@
 use askama_axum::IntoResponse;
 use velvet_web::prelude::*;
 
-pub fn app() -> Router {
-    Router::new()
+pub async fn app() -> App {
+    let routes = Router::new()
         .route("/", get(index))
         .route("/topics", get(topics).post(new_topic))
         .route("/posts/:topic_id", get(posts).post(new_reply))
+        .authorized_cookie_claims("/login", |_: Claims| Ok(AuthResult::OK));
+
+    #[derive(RustEmbed)]
+    #[folder = "static"]
+    struct S;
+
+    dotenvy::dotenv().ok();
+    let db = sqlite().await;
+    sqlx::migrate!().run(&db).await.unwrap();
+
+    App::new()
+        .router(routes)
+        .login_flow_with_mail(&db)
+        .await
+        .inject(db)
+        .inject(mailer())
+        .statics::<S>()
 }
 
 #[derive(Deserialize)]

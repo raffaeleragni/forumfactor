@@ -1,19 +1,10 @@
-use axum::Extension;
 use axum_test::TestServer;
 use forumfactor::app::app;
 use velvet_web::prelude::*;
 
 pub async fn setup() -> TestServer {
-    let db = newdb().await;
-
-    TestServer::new(app().layer(Extension(db))).unwrap()
-}
-
-async fn newdb() -> Pool<Sqlite> {
     std::fs::remove_file("test.db").unwrap_or(());
-    let db = sqlite().await;
-    sqlx::migrate!().run(&db).await.unwrap();
-    db
+    app().await.as_test_server().await.login_as("1").await
 }
 
 #[tokio::test]
